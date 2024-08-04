@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:confetti/confetti.dart';
+import 'auth_service.dart';
+import 'daemon_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -7,119 +11,224 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+    return const MaterialApp(
+      home: MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+  const MyHomePage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  MyHomePageState createState() => MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class MyHomePageState extends State<MyHomePage> {
+// Replace with your server URL
+  String _status = 'Disconnected';
+  bool _isConnecting = false;
+  String? _authToken;
+  ConfettiController? _confettiController;
 
-  void _incrementCounter() {
+  @override
+  void initState() {
+    super.initState();
+    _fetchAuthToken();
+    _confettiController = ConfettiController(duration: const Duration(seconds: 10));
+  }
+
+  @override
+  void dispose() {
+    _confettiController?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _fetchAuthToken() async {
+    try {
+      final token = await AuthService.fetchAuthToken();
+      setState(() {
+        _authToken = token;
+      });
+      if (_authToken == null) {
+        print('No auth token received');
+      } else {
+        print('Received auth token: $_authToken');
+      }
+    } catch (e) {
+      print('Failed to fetch token: $e');
+    }
+  }
+
+  Future<void> _connect() async {
+    if (_authToken == null) {
+      print('No auth token available');
+      return;
+    }
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _isConnecting = true;
     });
+    try {
+      final result = await DaemonService.connect(_authToken!);
+      setState(() {
+        _status = result ?? 'Unknown status';
+      });
+      if (_status == 'connected') {
+        _confettiController?.play();
+      }
+    } catch (e) {
+      print("Failed to connect: '$e'.");
+    } finally {
+      setState(() {
+        _isConnecting = false;
+      });
+    }
+  }
+
+  Future<void> _disconnect() async {
+    try {
+      await DaemonService.disconnect();
+      setState(() {
+        _status = 'Disconnected';
+      });
+      _confettiController?.stop();
+    } catch (e) {
+      print("Failed to disconnect: '$e'.");
+    }
+  }
+
+  Future<void> _getStatus() async {
+    try {
+      final result = await DaemonService.getStatus();
+      setState(() {
+        _status = result ?? 'Unknown status';
+      });
+    } catch (e) {
+      print("Failed to get status: '$e'.");
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Colors.black, Colors.grey],
+          ),
+        ),
+        child: Stack(
+          children: [
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    'Welcome to my VPN App!🚀',
+                    style: GoogleFonts.pacifico(fontSize: 24, color: Colors.white),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Status: $_status',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  _isConnecting
+                      ? const CircularProgressIndicator()
+                      : Column(
+                          children: [
+                            ElevatedButton(
+                              onPressed: _authToken == null ? null : _connect,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.grey[300], // Silver background
+                                textStyle: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  shadows: [
+                                    Shadow(
+                                      offset: Offset(1.0, 1.0),
+                                      blurRadius: 3.0,
+                                      color: Colors.black,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              child: const Text(
+                                'Connect',
+                                style: TextStyle(color: Colors.black),
+                              ),
+                            ),
+                            ElevatedButton(
+                              onPressed: _disconnect,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.grey[300], // Silver background
+                                textStyle: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  shadows: [
+                                    Shadow(
+                                      offset: Offset(1.0, 1.0),
+                                      blurRadius: 3.0,
+                                      color: Colors.black,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              child: const Text(
+                                'Disconnect',
+                                style: TextStyle(color: Colors.black),
+                              ),
+                            ),
+                            ElevatedButton(
+                              onPressed: _getStatus,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.grey[300], // Silver background
+                                textStyle: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  shadows: [
+                                    Shadow(
+                                      offset: Offset(1.0, 1.0),
+                                      blurRadius: 3.0,
+                                      color: Colors.black,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              child: const Text(
+                                'Get Status',
+                                style: TextStyle(color: Colors.black),
+                              ),
+                            ),
+                          ],
+                        ),
+                ],
+              ),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            Align(
+              alignment: Alignment.topCenter,
+              child: ConfettiWidget(
+                confettiController: _confettiController!,
+                blastDirectionality: BlastDirectionality.explosive,
+                shouldLoop: false,
+                colors: const [
+                  Colors.red,
+                  Colors.blue,
+                  Colors.green,
+                  Colors.yellow,
+                  Colors.purple,
+                  Colors.orange,
+                ],
+              ),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
