@@ -27,7 +27,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class MyHomePageState extends State<MyHomePage> {
-// Replace with your server URL
   String _status = 'Disconnected';
   bool _isConnecting = false;
   String? _authToken;
@@ -37,7 +36,7 @@ class MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _fetchAuthToken();
-    _confettiController = ConfettiController(duration: const Duration(seconds: 10));
+    _confettiController = ConfettiController(duration: const Duration(seconds: 2));
   }
 
   @override
@@ -91,22 +90,11 @@ class MyHomePageState extends State<MyHomePage> {
     try {
       await DaemonService.disconnect();
       setState(() {
-        _status = 'Disconnected';
+        _status = 'disconnected';
       });
       _confettiController?.stop();
     } catch (e) {
       print("Failed to disconnect: '$e'.");
-    }
-  }
-
-  Future<void> _getStatus() async {
-    try {
-      final result = await DaemonService.getStatus();
-      setState(() {
-        _status = result ?? 'Unknown status';
-      });
-    } catch (e) {
-      print("Failed to get status: '$e'.");
     }
   }
 
@@ -128,8 +116,12 @@ class MyHomePageState extends State<MyHomePage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Text(
-                    'Welcome to my VPN App!🚀',
-                    style: GoogleFonts.pacifico(fontSize: 24, color: Colors.white),
+                    'Welcome!🚀',
+                    style: GoogleFonts.pacifico(fontSize: 48, color: Colors.white),
+                  ),
+                                    Text(
+                    'Let\'s get connected \n hit the button \n below to get started!🚀',
+                    style: GoogleFonts.montserrat(fontSize: 24, color: Colors.white),
                   ),
                   const SizedBox(height: 20),
                   Text(
@@ -185,26 +177,6 @@ class MyHomePageState extends State<MyHomePage> {
                                 style: TextStyle(color: Colors.black),
                               ),
                             ),
-                            ElevatedButton(
-                              onPressed: _getStatus,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey[300], // Silver background
-                                textStyle: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  shadows: [
-                                    Shadow(
-                                      offset: Offset(1.0, 1.0),
-                                      blurRadius: 3.0,
-                                      color: Colors.black,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              child: const Text(
-                                'Get Status',
-                                style: TextStyle(color: Colors.black),
-                              ),
-                            ),
                           ],
                         ),
                 ],
@@ -217,12 +189,12 @@ class MyHomePageState extends State<MyHomePage> {
                 blastDirectionality: BlastDirectionality.explosive,
                 shouldLoop: false,
                 colors: const [
-                  Colors.red,
-                  Colors.blue,
-                  Colors.green,
-                  Colors.yellow,
-                  Colors.purple,
-                  Colors.orange,
+                  Color.fromARGB(255, 235, 22, 7),
+                  Color.fromARGB(255, 16, 127, 218),
+                  Color.fromARGB(255, 38, 201, 44),
+                  Color.fromARGB(255, 241, 223, 61),
+                  Color.fromARGB(255, 199, 24, 230),
+                  Color.fromARGB(255, 227, 145, 21),
                 ],
               ),
             ),
