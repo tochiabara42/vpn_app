@@ -19,11 +19,11 @@ import 'package:vpn_app/authentication.dart' as _i2;
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
 
-/// A class which mocks [AuthService].
+/// A class which mocks [Authentication].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockAuthService extends _i1.Mock implements _i2.AuthService {
-  MockAuthService() {
+class MockAuthentication extends _i1.Mock implements _i2.Authentication {
+  MockAuthentication() {
     _i1.throwOnMissingStub(this);
   }
 }

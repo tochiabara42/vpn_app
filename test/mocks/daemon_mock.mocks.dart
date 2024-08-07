@@ -19,11 +19,11 @@ import 'package:vpn_app/daemon.dart' as _i2;
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
 
-/// A class which mocks [DaemonService].
+/// A class which mocks [Daemon].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockDaemonService extends _i1.Mock implements _i2.DaemonService {
-  MockDaemonService() {
+class MockDaemon extends _i1.Mock implements _i2.Daemon {
+  MockDaemon() {
     _i1.throwOnMissingStub(this);
   }
 }

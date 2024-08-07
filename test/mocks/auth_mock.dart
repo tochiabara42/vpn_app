@@ -2,5 +2,5 @@
 import 'package:mockito/annotations.dart';
 import 'package:vpn_app/authentication.dart';  // Update with your actual path
 
-@GenerateMocks([AuthService])
+@GenerateMocks([Authentication])
 void main() {}
