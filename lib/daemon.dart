@@ -1,18 +1,20 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-class DaemonService {
-  static const String _serverUrl = 'http://localhost:5003';  // Ensure this matches your Python server URL
+//The daemon_service typically manages the connection to a service, such as VPN, and handles actions like connecting and disconnecting
+class Daemon {
+  static http.Client client = http.Client(); 
+  static const String _serverUrl = 'http://localhost:5003';
 
+//Logic to connect to the service using the auth token
   static Future<String?> connect(String authToken) async {
     try {
-      final response = await http.post(
+      final response = await client.post(
         Uri.parse('$_serverUrl/connect'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'authToken': authToken}),
       );
 
-      // Debugging output
       print('Connect Response Status Code: ${response.statusCode}');
       print('Connect Response Body: ${response.body}');
 
@@ -39,13 +41,13 @@ class DaemonService {
     }
   }
 
+//Logic to disconnect from the service
   static Future<void> disconnect() async {
     try {
-      final response = await http.post(
+      final response = await client.post(
         Uri.parse('$_serverUrl/disconnect'),
       );
 
-      // Debugging output
       print('Disconnect Response Status Code: ${response.statusCode}');
       print('Disconnect Response Body: ${response.body}');
 
@@ -70,11 +72,10 @@ class DaemonService {
 
   static Future<String?> getStatus() async {
     try {
-      final response = await http.get(
+      final response = await client.get(
         Uri.parse('$_serverUrl/status'),
       );
 
-      // Debugging output
       print('Get Status Response Status Code: ${response.statusCode}');
       print('Get Status Response Body: ${response.body}');
 
@@ -101,5 +102,6 @@ class DaemonService {
     }
   }
 }
+
 
 

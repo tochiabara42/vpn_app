@@ -1,16 +1,53 @@
-# vpn_app
+# vpn_app 🖥️📱💻
 
-A new Flutter project.
 
-## Getting Started
 
-This project is a starting point for a Flutter application.
+## Overview
 
-A few resources to get you started if this is your first Flutter project:
+This project includes a Flutter app that interacts with a Python daemon. Below are the instructions for starting the application, running tests and managing the daemon. 
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Prerequisites
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Ensure you have the following installed:
+
+- Python 3
+- Flutter SDK
+
+### Starting the application
+
+1. Start the Daemon:
+
+Open a terminal and run the daemon using:
+
+`tmp/daemon-lite`
+
+2. Start the Python Server and Flutter App:
+
+Open a second terminal and execute the provided 'start.sh' script:
+
+`./start.sh`
+
+The script will:
+
+- Start the Python server in the background.
+- Launch the Flutter app.
+- Stop the Python server when the Flutter app exits.
+
+## Testing
+
+### Python Tests
+
+To run Python tests, execute the following command:
+
+`python -m unittest discover -s test/python -p 'test_*.py`
+
+### Flutter Tests
+
+To run Flutter tests, execute the following command:
+
+`flutter test`
+
+## Troubleshooting
+
+If the Daemon refuses to start, check the permissions and the execute flag for `tmp/daemon-lite`. Ensure no other process is using the required port.
+

@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-class AuthService {
+//The auth_service is responsible for managing authentication
+class Authentication {
   static const String _apiUrl = 'https://warp-registration.warpdir2792.workers.dev/';
   static const String _apiKey = '3735928559';
+  static http.Client client = http.Client(); // Default to real client
 
   static Future<String?> fetchAuthToken() async {
-    final response = await http.get(
+    final response = await client.get(
       Uri.parse(_apiUrl),
       headers: {'X-Auth-Key': _apiKey},
     );
@@ -25,6 +27,7 @@ class AuthService {
     }
   }
 }
+
 
 
 
