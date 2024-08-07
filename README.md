@@ -19,7 +19,7 @@ Ensure you have the following installed:
 
 Open a terminal and run the daemon using:
 
-`tmp/daemon-lite`
+`tmp/daemon-lite` or cd into `daemon-lite-src` and execute `cargo run`
 
 2. Start the Python Server and Flutter App:
 
